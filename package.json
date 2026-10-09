@@ -1,0 +1,19 @@
+{
+  "name": "monobudget-ios",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Weekly and monthly Monobank spending budget as iOS widgets (Scriptable).",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/25LioN52/MonoBudget-ios.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "scan": "node scripts/secret-scan.mjs --all",
+    "check": "node --test && node scripts/secret-scan.mjs --all"
+  }
+}

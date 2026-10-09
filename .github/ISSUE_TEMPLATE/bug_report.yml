@@ -1,0 +1,45 @@
+name: 🐞 Помилка / Bug report
+description: Щось працює не так / Something doesn't work
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > ⚠️ **Ніколи не вставляйте сюди токен Monobank, виписки, IBAN, номери карток чи скриншоти з реальними сумами й описами операцій.** Issue публічні.
+        > **Never paste your Monobank token, statements, IBANs, card numbers or screenshots with real transactions.** Issues are public.
+  - type: textarea
+    id: what
+    attributes:
+      label: Що сталося / What happened
+      description: Опишіть проблему і як її відтворити. / Describe the problem and how to reproduce it.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Що мало статися / Expected behaviour
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Де / Where
+      options:
+        - Віджет на домашньому екрані / Home screen widget
+        - Віджет на екрані блокування / Lock screen widget
+        - Звіт у додатку / In-app report
+        - Інше / Other
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Версії / Versions
+      description: iOS, Scriptable, MonoBudget (наприклад / e.g. iOS 26.0, Scriptable 1.7, MonoBudget 1.0.0)
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Приватність / Privacy
+      options:
+        - label: Я не додав(-ла) токен, виписки чи інші особисті фінансові дані. / I did not include my token, statements or other personal financial data.
+          required: true

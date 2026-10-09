@@ -1,0 +1,37 @@
+# Secrets & personal data — never commit
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.mobileprovision
+cache.json
+*token*.txt
+statement*.json
+!tests/fixtures/statement-*.json
+*.pdf
+*.xls
+*.xlsx
+*.csv
+*.ofx
+*.qif
+*.har
+*.heic
+CLAUDE.local.md
+
+# Node
+node_modules/
+npm-debug.log*
+coverage/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# Claude Code: personal settings stay local
+.claude/settings.local.json
