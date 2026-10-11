@@ -26,7 +26,7 @@ Docs: https://api.monobank.ua/docs/ — the agent must **never** call the live A
 
 - Count only EUR accounts (`currencyCode === 978`) and use `amount` (already EUR).
 - Holds (`hold: true`) count. They can later change amount or disappear, so each refresh replaces all cached items in the fetched window.
-- Own transfers: `counterIban` matches one of the user's IBANs; otherwise description patterns (currency exchange, jars). Positive amounts are refunds only for purchase categories; transfers/cash are income.
+- Own transfers: `counterIban` matches one of the user's IBANs; otherwise description patterns (currency exchange, jars). A credit is a refund only when the MCC table alone (`mcc`, then `originalMcc`) gives a purchase category; transfers/cash, MCC 0 and unknown MCCs are income. `categoryOverrides` change the displayed category, never whether a credit is a refund (same rule as MonoBudget-telegram).
 
 ## Synthetic fixtures (never real data)
 

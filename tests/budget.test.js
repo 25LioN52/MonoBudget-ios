@@ -52,6 +52,34 @@ test("refunds are ignored when refundsReduceSpending is false", () => {
   assert.equal(core.classifyTransaction(byDesc("Mercadona"), noRefunds).kind, "income");
 });
 
+test("credits are refunds only when the bank's MCC is a purchase", () => {
+  const credit = (description, mcc, originalMcc) => ({
+    id: "credit-" + description, time: NOW / 1000, description, mcc, originalMcc: originalMcc || 0,
+    hold: false, amount: 2500, own: false,
+  });
+  const classify = (tx, config) => core.classifyTransaction(tx, config || cfg);
+  assert.deepEqual(classify(credit("Lidl", 5411)), { kind: "refund", category: "groceries" });
+  assert.deepEqual(classify(credit("Lidl", 0, 5411)), { kind: "refund", category: "groceries" }); // originalMcc fallback
+  assert.deepEqual(classify(credit("Cashback", 0)), { kind: "income", reason: "income", category: "other" });
+  assert.deepEqual(classify(credit("Unknown merchant", 9999)), { kind: "income", reason: "income", category: "other" });
+  // An override changes the category shown, never turns a transfer into a refund.
+  const anaGroceries = testConfig(core, { categoryOverrides: { ana: "Groceries" } });
+  assert.deepEqual(classify(credit("Від: Ana", 4829), anaGroceries), { kind: "income", reason: "income", category: "groceries" });
+  // ...and does not make a purchase-MCC credit income either (same rule as MonoBudget-telegram).
+  const lidlTransfers = testConfig(core, { categoryOverrides: { lidl: "Transfers" } });
+  assert.deepEqual(classify(credit("Lidl", 5411), lidlTransfers), { kind: "refund", category: "transfers" });
+  assert.equal(classify(credit("Cash deposit", 6011)).kind, "income");
+  assert.equal(classify(credit("Lidl", 5411, 4829)).kind, "refund"); // mcc wins over originalMcc, as in categoryFor
+  for (const [mcc, originalMcc] of [[-5411, 0], [Number.NaN, 0], [0, undefined], [0, -5411]]) {
+    const tx = { ...credit("Odd", mcc), originalMcc }; // undefined reads like a missing field
+    assert.equal(classify(tx).kind, "income", `mcc ${mcc} / ${originalMcc}`);
+  }
+  // A big credit without MCC (salary, interest) never makes spending negative.
+  const expense = { ...credit("Lidl", 5411), id: "expense-lidl", amount: -4000 };
+  const s = core.summarize([expense, { ...credit("Cashback", 0), amount: 150000 }], NOW - 1000, NOW, cfg);
+  assert.deepEqual({ spent: s.spent, refunds: s.refunds, count: s.count }, { spent: 4000, refunds: 0, count: 1 });
+});
+
 test("category overrides win over MCC; custom names create categories", () => {
   assert.equal(core.categoryFor({ description: "MERCADONA S.A.", mcc: 5999 }, cfg), "groceries");
   assert.equal(core.categoryFor(byDesc("Starbucks Gran Via"), cfg), "custom:Кава");
