@@ -47,7 +47,8 @@ const CONFIG = {
   excludedMcc: [],
   excludedDescriptions: [],
 
-  // Refunds from merchants reduce spending (income and transfers never do).
+  // Refunds from merchants (credits with a purchase MCC) reduce spending;
+  // salary, cashback and transfers never do.
   refundsReduceSpending: true,
 
   // Description substring → category. Wins over the MCC table.
@@ -248,7 +249,7 @@ for (const [category, codes] of Object.entries(MCC_CATEGORIES)) {
   }
 }
 
-// Positive amounts in these categories are income/transfers, never refunds.
+// Credits whose MCC maps to these categories are income/transfers, never refunds.
 const NON_PURCHASE_CATEGORIES = new Set(["cash", "transfers"]);
 
 const CATEGORY_NAMES = {
@@ -356,7 +357,12 @@ function classifyTransaction(tx, cfg) {
     return { kind: "excluded", reason: "own", category };
   }
   if (tx.amount < 0) return { kind: "expense", category };
-  if (cfg.refundsReduceSpending && !NON_PURCHASE_CATEGORIES.has(category)) return { kind: "refund", category };
+  // A credit is a refund only if the bank's MCC says purchase. Overrides decide the category
+  // shown, never whether money is income: salary, cashback (MCC 0) and transfers stay income.
+  const merchant = categoryForMcc(tx.mcc) || categoryForMcc(tx.originalMcc);
+  if (cfg.refundsReduceSpending && merchant !== null && !NON_PURCHASE_CATEGORIES.has(merchant)) {
+    return { kind: "refund", category };
+  }
   return { kind: "income", reason: "income", category };
 }
 
